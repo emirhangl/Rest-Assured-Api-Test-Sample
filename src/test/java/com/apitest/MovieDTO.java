@@ -1,4 +1,4 @@
-package com.trendyol.apitest;
+package com.apitest;
 
 public class MovieDTO {
      private String Title;

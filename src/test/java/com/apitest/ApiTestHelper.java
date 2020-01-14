@@ -1,4 +1,4 @@
-package com.trendyol.apitest;
+package com.apitest;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -7,18 +7,21 @@ import io.restassured.response.Response;
 
 import java.util.List;
 
+import static io.restassured.RestAssured.baseURI;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.not;
 
 public class ApiTestHelper {
 
-    public String getIdFromMovie(String baseURI, String apiKey, String searchWord, String movieTitle) {
-        RestAssured.baseURI = baseURI;
+    String baseURI = System.getProperty("baseURI","http://www.omdbapi.com/");
+
+    public String getIdFromMovie(String apiKey, String searchWord, String movieTitle) {
+    RestAssured.baseURI = baseURI;
         String id = null;
         try {
         // Endpoint'e request atıp response'ımızı aldık
-        Response response = getResponseFromEndPoint("/?apikey="+apiKey+"&s="+searchWord);
+        Response response = getResponseFromEndPoint(apiKey,searchWord);
 
         // Json objemizi POJO classımıza deserialize ettik
         JsonPath path = response.jsonPath();
@@ -44,8 +47,10 @@ public class ApiTestHelper {
     public void searchByID(String apiKey, String id) {
         try {
         given()
+                .param("apikey", apiKey)
+                .param("i",id)
                 .when()
-                .get("http://www.omdbapi.com/?apikey="+apiKey+"&i="+id)
+                .get()
                 .then()
                 .log()
                 .all()
@@ -58,11 +63,13 @@ public class ApiTestHelper {
         }
     }
 
-    private Response getResponseFromEndPoint(String endpoint) {
+    private Response getResponseFromEndPoint(String apiKey, String searchWord) {
         try {
         return given()
+                .param("apikey", apiKey)
+                .param("s", searchWord)
                 .when()
-                .get(endpoint)
+                .get()
                 .then()
                 .log()
                 .all()
